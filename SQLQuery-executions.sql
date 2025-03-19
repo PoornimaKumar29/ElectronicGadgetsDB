@@ -149,7 +149,7 @@ join orderdetails od on o.order_id = od.order_id
 join products p on od.product_id = p.product_id
 where o.order_date between @start_date and @end_date;
 
------------------------------------------------------------------------------TASK 3------------------------------------------------------------
+-----------------------------------------------------------------------------TASK 4------------------------------------------------------------
 
 --1.
 select * from Customers
