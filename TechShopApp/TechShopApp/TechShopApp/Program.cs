@@ -1,9 +1,10 @@
 ﻿using System;
 using TechShopApp.dao;
 using TechShopApp.entity;
-using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using TechShopApp.util;
+using TechShopApp.exception;
+
 namespace TechShopApp
 {
     class Program
@@ -15,17 +16,22 @@ namespace TechShopApp
                 Console.WriteLine("Opening database connection...");
                 using (SqlConnection conn = DatabaseConnector.OpenConnection())
                 {
-                    Console.WriteLine("✅ Database connected successfully!\n");
+                    Console.WriteLine("Database connected successfully!\n");
                 }
             }
-            catch (Exception ex)
+            catch (DatabaseConnectionException ex)
             {
                 Console.WriteLine("❌ Failed to connect to the database.");
                 Console.WriteLine("Error: " + ex.Message);
                 Console.WriteLine("Exiting application...");
                 return;
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ An unexpected error occurred.");
+                Console.WriteLine("Error: " + ex.Message);
+                return;
+            }
             ServiceProvider serviceProvider = new ServiceProvider();
             int choice;
 
@@ -75,9 +81,18 @@ namespace TechShopApp
                             Phone = phone,
                             Address = address
                         };
-                        serviceProvider.RegisterCustomer(customer);
-                        Console.WriteLine("Customer Registered Successfully!");
+                        try
+                        {
+                            serviceProvider.RegisterCustomer(customer);
+                            Console.WriteLine("Customer Registered Successfully!");
+                        }
+                            catch (InvalidCustomerException ex)
+                            {
+                            Console.WriteLine("Failed to register customer.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
+
 
                     case 2:
                         // Add Product
@@ -87,18 +102,25 @@ namespace TechShopApp
                         Console.Write("Description: ");
                         string description = Console.ReadLine();
                         Console.Write("Price: ");
-                        decimal price = decimal.Parse(Console.ReadLine());
+                        int price = Convert.ToInt32(Console.ReadLine());
 
                         Product product = new Product
                         {
                             ProductName = productName,
-                            Description = description,
-                            Price = price
+                            ProductDescription = description,
+                            ProductPrice = price
                         };
-                        serviceProvider.AddProduct(product);
-                        Console.WriteLine("Product Added Successfully!");
+                        try
+                        {
+                            serviceProvider.AddProduct(product);
+                            Console.WriteLine("Product Added Successfully!");
+                        }
+                        catch (InvalidProductException ex)
+                        {
+                            Console.WriteLine("Failed to add product.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
-
                     case 3:
                         // Update Product
                         Console.Write("Enter Product ID to Update: ");
@@ -108,25 +130,41 @@ namespace TechShopApp
                         Console.Write("Updated Description: ");
                         string updatedDescription = Console.ReadLine();
                         Console.Write("Updated Price: ");
-                        decimal updatedPrice = decimal.Parse(Console.ReadLine());
+                        int updatedPrice = Convert.ToInt32(Console.ReadLine());
+
+                      
 
                         Product updatedProduct = new Product
                         {
                             ProductID = updateProductID,
                             ProductName = updatedProductName,
-                            Description = updatedDescription,
-                            Price = updatedPrice
+                            ProductDescription = updatedDescription,
+                            ProductPrice = updatedPrice
                         };
-                        serviceProvider.UpdateProduct(updatedProduct);
-                        Console.WriteLine("Product Updated Successfully!");
+                        try
+                        {
+                            serviceProvider.UpdateProduct(updatedProduct);
+                        }
+                        catch (InvalidProductException ex)
+                        {
+                            Console.WriteLine("Failed to update product.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
 
                     case 4:
                         // Remove Product
                         Console.Write("Enter Product ID to Remove: ");
                         int productIDToRemove = int.Parse(Console.ReadLine());
-                        serviceProvider.RemoveProduct(productIDToRemove);
-                        Console.WriteLine("Product Removed Successfully!");
+                        try
+                        {
+                            serviceProvider.RemoveProduct(productIDToRemove);
+                        }
+                        catch (InvalidProductException ex)
+                        {
+                            Console.WriteLine("Failed to remove product.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
 
                     case 5:
@@ -137,7 +175,7 @@ namespace TechShopApp
                         Console.Write("Order Date (yyyy-mm-dd): ");
                         DateTime orderDate = DateTime.Parse(Console.ReadLine());
                         Console.Write("Total Amount: ");
-                        decimal totalAmount = decimal.Parse(Console.ReadLine());
+                        int totalAmount = int.Parse(Console.ReadLine());
 
                         Order order = new Order
                         {
@@ -145,8 +183,16 @@ namespace TechShopApp
                             OrderDate = orderDate,
                             TotalAmount = totalAmount
                         };
-                        serviceProvider.PlaceOrder(order);
-                        Console.WriteLine("Order Placed Successfully!");
+                        try
+                        {
+                            serviceProvider.PlaceOrder(order);
+                            Console.WriteLine("Order Placed Successfully!");
+                        }
+                        catch (OrderProcessingException ex)
+                        {
+                            Console.WriteLine(" Failed to place order.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
 
                     case 6:
@@ -260,20 +306,27 @@ namespace TechShopApp
                         decimal paymentAmount = decimal.Parse(Console.ReadLine());
                         Console.Write("Enter Payment Method: ");
                         string paymentMethod = Console.ReadLine();
-
-                        serviceProvider.ProcessPayment(orderIDForPayment, paymentAmount, paymentMethod);
-                        Console.WriteLine("Payment Processed Successfully!");
+                        try
+                        {
+                            serviceProvider.ProcessPayment(orderIDForPayment, paymentAmount, paymentMethod);
+                            Console.WriteLine("Payment Processed Successfully!");
+                        }
+                        catch (PaymentProcessingException ex)
+                        {
+                            Console.WriteLine("❌ Failed to process payment.");
+                            Console.WriteLine("Error: " + ex.Message);
+                        }
                         break;
 
                     case 13:
                         // Search Products
-                        Console.Write("Enter Search Query: ");
+                        Console.Write("Enter Search Product: ");
                         string searchQuery = Console.ReadLine();
                         var products = serviceProvider.SearchProducts(searchQuery);
                         Console.WriteLine("Search Results:");
                         foreach (var prod in products)
                         {
-                            Console.WriteLine($"Product ID: {prod.ProductID}, Name: {prod.ProductName}, Price: {prod.Price}");
+                            Console.WriteLine($"Product ID: {prod.ProductID}, Name: {prod.ProductName}, Price: {prod.ProductPrice}");
                         }
                         break;
 
@@ -285,7 +338,7 @@ namespace TechShopApp
                         Console.WriteLine("Recommended Products:");
                         foreach (var prod in recommendedProducts)
                         {
-                            Console.WriteLine($"Product ID: {prod.ProductID}, Name: {prod.ProductName}, Price: {prod.Price}");
+                            Console.WriteLine($"Product ID: {prod.ProductID}, Name: {prod.ProductName}, Price: {prod.ProductPrice}");
                         }
                         break;
 
@@ -298,9 +351,8 @@ namespace TechShopApp
                         break;
                 }
 
-                Console.WriteLine("\nPress any key to continue...");
-                Console.ReadKey();
-
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();  //
             } while (choice != 0);
         }
     }

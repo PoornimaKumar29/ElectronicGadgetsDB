@@ -1,25 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TechShopApp.entity
+﻿namespace TechShopApp.entity
 {
     public class Order
     {
-        // Private fields
         private int orderID;
-        private Customer customer;  // Composition (one-to-one relationship with Customer)
+        private Customer customer;  // Relationship with Customer
         private DateTime orderDate;
-        private decimal totalAmount;
+        private int totalAmount;
+        public string Status { get; set; }
 
-        public Order() { }
+        public Order()
+        {
+
+        }
         // Constructor
-        public Order(int orderID, Customer customer, DateTime orderDate, decimal totalAmount)
+        public Order(int orderID, Customer customer, DateTime orderDate, int totalAmount)
         {
             this.OrderID = orderID;
-            this.Customer = customer; // Ensures that customer cannot be null
+            this.Customer = customer;
             this.OrderDate = orderDate;
             this.TotalAmount = totalAmount;
         }
@@ -34,52 +31,19 @@ namespace TechShopApp.entity
         public Customer Customer
         {
             get { return customer; }
-            set
-            {
-                // Validation: Ensure that the customer is not null
-                if (value != null)
-                {
-                    customer = value;
-                }
-                else
-                {
-                    Console.WriteLine("Customer cannot be null.");
-                }
-            }
+            set { customer = value; }
         }
 
         public DateTime OrderDate
         {
             get { return orderDate; }
-            set
-            {
-                // Validation: Order date cannot be in the future
-                if (value <= DateTime.Now)
-                {
-                    orderDate = value;
-                }
-                else
-                {
-                    Console.WriteLine("Order date cannot be in the future.");
-                }
-            }
+            set { orderDate = value; }
         }
 
-        public decimal TotalAmount
+        public int TotalAmount
         {
             get { return totalAmount; }
-            set
-            {
-                // Validation: Total amount cannot be negative
-                if (value >= 0)
-                {
-                    totalAmount = value;
-                }
-                else
-                {
-                    Console.WriteLine("Total amount cannot be negative.");
-                }
-            }
+            set { totalAmount = value; }
         }
     }
 }

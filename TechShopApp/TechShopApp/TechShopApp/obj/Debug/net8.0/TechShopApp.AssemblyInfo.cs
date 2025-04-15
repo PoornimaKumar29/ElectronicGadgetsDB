@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TechShopApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9867357abf585d67835f0b6c155eb065a2e9a0de")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d8a127657746855897c41f6dd6fa1bfcbdda7e37")]
 [assembly: System.Reflection.AssemblyProductAttribute("TechShopApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TechShopApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

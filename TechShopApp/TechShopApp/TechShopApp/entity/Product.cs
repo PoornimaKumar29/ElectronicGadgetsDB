@@ -1,31 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-namespace TechShopApp.entity
+﻿namespace TechShopApp.entity
 {
     public class Product
     {
-        // Private fields
         private int productID;
         private string productName;
-        private string description;
-        private decimal price;
-        public Product()
-        {
-            // Set default values or leave empty
-        }
+        private string productDescription;
+        private int productPrice;
 
         // Constructor
-        public Product(int productID, string productName, string description, decimal price)
+        public Product()
+        {
+
+        }
+        public Product(int productID, string productName, string productDescription, int productPrice)
         {
             this.ProductID = productID;
             this.ProductName = productName;
-            this.Description = description;
-            this.Price = price;
+            this.ProductDescription = productDescription;
+            this.ProductPrice = productPrice;
         }
 
         // Properties
@@ -38,51 +30,22 @@ namespace TechShopApp.entity
         public string ProductName
         {
             get { return productName; }
-            set
-            {
-                // Validation: ProductName must not be null or empty
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    productName = value;
-                }
-                else
-                {
-                    Console.WriteLine("Product Name cannot be null or empty.");
-                }
-            }
+            set { productName = value; }
         }
 
-        public string Description
+        public string ProductDescription
         {
-            get { return description; }
-            set
-            {
-                // Validation: Description must not be null or empty
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    description = value;
-                }
-                else
-                {
-                    Console.WriteLine("Description cannot be null or empty.");
-                }
-            }
+            get { return productDescription; }
+            set { productDescription = value; }
         }
 
-        public decimal Price
+        public int ProductPrice
         {
-            get { return price; }
+            get { return productPrice; }
             set
             {
-                // Validation: Price must be non-negative
-                if (value >= 0)
-                {
-                    price = value;
-                }
-                else
-                {
-                    Console.WriteLine("Price must be a non-negative value.");
-                }
+                if (value >= 0) productPrice = value;
+                else Console.WriteLine("Price cannot be negative.");
             }
         }
     }

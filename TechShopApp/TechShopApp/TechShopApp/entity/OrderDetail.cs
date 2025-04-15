@@ -1,27 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-namespace TechShopApp.entity
+﻿namespace TechShopApp.entity
 {
     public class OrderDetail
     {
-        // Private fields
         private int orderDetailID;
-        private Order order;        // Composition (one-to-one relationship with Order)
-        private Product product;    // Composition (one-to-one relationship with Product)
+        private Order order;  // Relationship with Order
+        private Product product;  // Relationship with Product
         private int quantity;
+        public OrderDetail()
+        {
 
-        public OrderDetail() { }
+        }
         // Constructor
         public OrderDetail(int orderDetailID, Order order, Product product, int quantity)
         {
             this.OrderDetailID = orderDetailID;
-            this.Order = order; // Ensures that order cannot be null
-            this.Product = product; // Ensures that product cannot be null
+            this.Order = order;
+            this.Product = product;
             this.Quantity = quantity;
         }
 
@@ -35,35 +29,13 @@ namespace TechShopApp.entity
         public Order Order
         {
             get { return order; }
-            set
-            {
-                // Validation: Ensure that the order is not null
-                if (value != null)
-                {
-                    order = value;
-                }
-                else
-                {
-                    Console.WriteLine("Order cannot be null.");
-                }
-            }
+            set { order = value; }
         }
 
         public Product Product
         {
             get { return product; }
-            set
-            {
-                // Validation: Ensure that the product is not null
-                if (value != null)
-                {
-                    product = value;
-                }
-                else
-                {
-                    Console.WriteLine("Product cannot be null.");
-                }
-            }
+            set { product = value; }
         }
 
         public int Quantity
@@ -71,15 +43,8 @@ namespace TechShopApp.entity
             get { return quantity; }
             set
             {
-                // Validation: Quantity must be positive
-                if (value > 0)
-                {
-                    quantity = value;
-                }
-                else
-                {
-                    Console.WriteLine("Quantity must be greater than zero.");
-                }
+                if (value > 0) quantity = value;
+                else Console.WriteLine("Quantity should be greater than 0.");
             }
         }
     }

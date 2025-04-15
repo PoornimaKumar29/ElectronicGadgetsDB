@@ -5,16 +5,18 @@ namespace TechShopApp.entity
 {
     public class Customer
     {
-        // Private fields
         private int customerID;
         private string firstName;
         private string lastName;
         private string email;
         private string phone;
         private string address;
-        public Customer() { }
 
         // Constructor
+        public Customer()
+        {
+
+        }
         public Customer(int customerID, string firstName, string lastName, string email, string phone, string address)
         {
             this.CustomerID = customerID;
@@ -25,8 +27,7 @@ namespace TechShopApp.entity
             this.Address = address;
         }
 
-        // Properties with validation
-
+        // Properties
         public int CustomerID
         {
             get { return customerID; }
@@ -38,15 +39,8 @@ namespace TechShopApp.entity
             get { return firstName; }
             set
             {
-                // Validation: First name cannot be empty
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("First name cannot be empty.");
-                }
-                else
-                {
-                    firstName = value;
-                }
+                if (string.IsNullOrWhiteSpace(value)) Console.WriteLine("First name cannot be empty.");
+                else firstName = value;
             }
         }
 
@@ -55,15 +49,8 @@ namespace TechShopApp.entity
             get { return lastName; }
             set
             {
-                // Validation: Last name cannot be empty
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("Last name cannot be empty.");
-                }
-                else
-                {
-                    lastName = value;
-                }
+                if (string.IsNullOrWhiteSpace(value)) Console.WriteLine("Last name cannot be empty.");
+                else lastName = value;
             }
         }
 
@@ -72,16 +59,9 @@ namespace TechShopApp.entity
             get { return email; }
             set
             {
-                // Validation: Email should be in a valid format
                 var emailRegex = new Regex(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-                if (emailRegex.IsMatch(value))
-                {
-                    email = value;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid email format.");
-                }
+                if (emailRegex.IsMatch(value)) email = value;
+                else Console.WriteLine("Invalid email format.");
             }
         }
 
@@ -90,15 +70,8 @@ namespace TechShopApp.entity
             get { return phone; }
             set
             {
-                // Validation: Phone number should only contain digits and should be 10 digits long
-                if (value.Length == 10 && value.All(char.IsDigit))
-                {
-                    phone = value;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid phone number. Phone number should be 10 digits.");
-                }
+                if (value.Length == 10 && value.All(char.IsDigit)) phone = value;
+                else Console.WriteLine("Invalid phone number. Phone number should be 10 digits.");
             }
         }
 
@@ -107,15 +80,8 @@ namespace TechShopApp.entity
             get { return address; }
             set
             {
-                // Validation: Address cannot be empty
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    Console.WriteLine("Address cannot be empty.");
-                }
-                else
-                {
-                    address = value;
-                }
+                if (string.IsNullOrWhiteSpace(value)) Console.WriteLine("Address cannot be empty.");
+                else address = value;
             }
         }
     }

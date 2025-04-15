@@ -41,3 +41,6 @@ CREATE TABLE Inventory (
     LastStock_Update DATE,
     FOREIGN KEY (Product_id) REFERENCES Products(Product_id) ON DELETE CASCADE
 )
+
+ALTER TABLE Orders
+ADD Status VARCHAR(50) DEFAULT 'Pending';

@@ -10,10 +10,20 @@ namespace TechShopApp.dao
     {
         public void RegisterCustomer(Customer customer)
         {
+            // Validation: Ensure customer values are valid.
+            if (string.IsNullOrWhiteSpace(customer.FirstName) || string.IsNullOrWhiteSpace(customer.LastName) ||
+                string.IsNullOrWhiteSpace(customer.Email) || string.IsNullOrWhiteSpace(customer.Phone) ||
+                string.IsNullOrWhiteSpace(customer.Address))
+            {
+                Console.WriteLine("Customer details are invalid.");
+                return; // Exit early if invalid
+            }
+
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
+                    // Query to insert a new customer without specifying the Customer_id (since it's auto-generated)
                     string query = "INSERT INTO Customers (Customer_FirstName, Customer_LastName, Customer_Email, Customer_Phone, Address) " +
                                    "VALUES (@FirstName, @LastName, @Email, @Phone, @Address)";
 
@@ -24,8 +34,17 @@ namespace TechShopApp.dao
                     command.Parameters.AddWithValue("@Phone", customer.Phone);
                     command.Parameters.AddWithValue("@Address", customer.Address);
 
-                    command.ExecuteNonQuery();
-                    Console.WriteLine("Customer Registered Successfully!");
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Check if the insert was successful by checking rows affected.
+                    if (rowsAffected > 0)
+                    {
+                        Console.WriteLine("Customer registered successfully!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to register the customer.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -33,22 +52,38 @@ namespace TechShopApp.dao
                 }
             }
         }
-
         public void AddProduct(Product product)
         {
+            // Validation: Ensure product values are valid.
+            if (string.IsNullOrWhiteSpace(product.ProductName) || product.ProductPrice <= 0)
+            {
+                Console.WriteLine("Product Name or Price is invalid.");
+                return; // Exit early if invalid
+            }
+
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "INSERT INTO Products (Product_ID, Product_Name, Product_Description, Product_Price) " +
-                                      "VALUES (@ProductID, @ProductName, @Description, @Price)";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@ProductID", product.ProductID);
-                    command.Parameters.AddWithValue("@ProductName", product.ProductName);
-                    command.Parameters.AddWithValue("@Description", product.Description);
-                    command.Parameters.AddWithValue("@Price", product.Price);
+                    string query = "INSERT INTO Products (Product_Name, Product_Description, Product_Price) " +
+                                   "VALUES (@ProductName, @Description, @Price)";
 
-                    command.ExecuteNonQuery();
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@ProductName", product.ProductName);
+                    command.Parameters.AddWithValue("@Description", product.ProductDescription);
+                    command.Parameters.AddWithValue("@Price", product.ProductPrice);
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Check if the insert was successful by checking rows affected.
+                    if (rowsAffected > 0)
+                    {
+                        Console.WriteLine("Product added successfully!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to add the product.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -56,59 +91,93 @@ namespace TechShopApp.dao
                 }
             }
         }
-
         public void UpdateProduct(Product product)
         {
+            // Validation: Ensure product values are valid.
+            if (product.ProductID <= 0 || string.IsNullOrWhiteSpace(product.ProductName) || product.ProductPrice <= 0)
+            {
+                Console.WriteLine("Product details are invalid.");
+                return; // Exit early if invalid
+            }
+
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "UPDATE Products SET ProductName = @ProductName, Description = @Description, Price = @Price WHERE ProductID = @ProductID";
+                    // Ensure column names match the ones in your database
+                    string query = "UPDATE Products SET Product_Name = @ProductName, Product_Description = @Description, Product_Price = @Price WHERE Product_id = @ProductID";
                     SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@ProductID", product.ProductID);
-                    command.Parameters.AddWithValue("@ProductName", product.ProductName);
-                    command.Parameters.AddWithValue("@Description", product.Description);
-                    command.Parameters.AddWithValue("@Price", product.Price);
 
-                    command.ExecuteNonQuery();
+                    // Add parameters for product details
+                    command.Parameters.AddWithValue("@ProductID", product.ProductID); // The ID of the product to update
+                    command.Parameters.AddWithValue("@ProductName", product.ProductName); // Updated name
+                    command.Parameters.AddWithValue("@Description", product.ProductDescription); // Updated description
+                    command.Parameters.AddWithValue("@Price", product.ProductPrice); // Updated price
+
+                    int rowsAffected = command.ExecuteNonQuery();
+
+                    // Check if the update was successful by checking rows affected.
+                    if (rowsAffected > 0)
+                    {
+                        Console.WriteLine("Product updated successfully!");
+                    }
+                    else
+                    {
+                        Console.WriteLine("No product found to update.");
+                    }
                 }
                 catch (Exception ex)
                 {
+                    // Error handling
                     Console.WriteLine($"Error: {ex.Message}");
                 }
             }
         }
-
         public void RemoveProduct(int productID)
         {
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "DELETE FROM Products WHERE ProductID = @ProductID";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@ProductID", productID);
+                    string query = "DELETE FROM Products WHERE Product_id = @ProductID";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ProductID", productID);
 
-                    command.ExecuteNonQuery();
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine($"Product with ID {productID} was successfully removed.");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No product found with ID {productID}.");
+                        }
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine("SQL Error occurred while removing the product: " + sqlEx.Message);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine("An unexpected error occurred: " + ex.Message);
                 }
-            }
-        }
-        //
+            }}
         public void PlaceOrder(Order order)
         {
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "INSERT INTO Orders (CustomerID, OrderDate, TotalAmount) VALUES (@CustomerID, @OrderDate, @TotalAmount)";
+                    string query = "INSERT INTO Orders (Customer_id, Order_Date, Total_Amount) VALUES (@CustomerId, @OrderDate, @TotalAmount)";
                     SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@CustomerID", order.Customer.CustomerID);
-                    command.Parameters.AddWithValue("@OrderDate", order.OrderDate);
-                    command.Parameters.AddWithValue("@TotalAmount", order.TotalAmount);
+
+                    // Use the updated column names based on your new SQL schema
+                    command.Parameters.AddWithValue("@CustomerId", order.Customer.CustomerID);  // Updated to match the new column name 'Customer_id'
+                    command.Parameters.AddWithValue("@OrderDate", order.OrderDate);              // Updated to match the new column name 'Order_Date'
+                    command.Parameters.AddWithValue("@TotalAmount", order.TotalAmount);          // Updated to match the new column name 'Total_Amount'
 
                     command.ExecuteNonQuery();
                 }
@@ -118,54 +187,85 @@ namespace TechShopApp.dao
                 }
             }
         }
-
         public void AddOrderDetail(OrderDetail orderDetail)
         {
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "INSERT INTO OrderDetails (OrderID, ProductID, Quantity) VALUES (@OrderID, @ProductID, @Quantity)";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@OrderID", orderDetail.Order.OrderID);
-                    command.Parameters.AddWithValue("@ProductID", orderDetail.Product.ProductID);
-                    command.Parameters.AddWithValue("@Quantity", orderDetail.Quantity);
+                    string query = "INSERT INTO OrderDetails (Order_id, Product_id, Quantity) VALUES (@OrderID, @ProductID, @Quantity)";
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+                        if (orderDetail.Order == null || orderDetail.Product == null)
+                        {
+                            throw new ArgumentNullException("Order or Product in OrderDetail cannot be null.");
+                        }
 
-                    command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@OrderID", orderDetail.Order.OrderID);
+                        command.Parameters.AddWithValue("@ProductID", orderDetail.Product.ProductID);
+                        command.Parameters.AddWithValue("@Quantity", orderDetail.Quantity);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine("Order detail added successfully.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No rows were inserted. Please check the data.");
+                        }
+                    }
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                }
+                catch (ArgumentNullException argEx)
+                {
+                    Console.WriteLine($"Argument Error: {argEx.Message}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
-                }
-            }
-        }
-        //
+                    Console.WriteLine($"Unexpected Error: {ex.Message}");
+                }}}
         public string GetOrderStatus(int orderID)
         {
-            using (SqlConnection connection = DatabaseConnector.OpenConnection())
+            try
             {
-                try
+                using (SqlConnection connection = DatabaseConnector.OpenConnection())
                 {
-                    string query = "SELECT Status FROM Orders WHERE OrderID = @OrderID";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@OrderID", orderID);
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    if (reader.HasRows)
+                    string query = "SELECT Status FROM Orders WHERE Order_id = @OrderID";
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        reader.Read();
-                        return reader["Status"].ToString();
-                    }
+                        command.Parameters.AddWithValue("@OrderID", orderID);
 
-                    return "Order not found.";
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    return "Error retrieving order status.";
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader["Status"].ToString();
+                            }
+                            else
+                            {
+                                return "Order not found.";
+                            }
+                        }
+                    }
                 }
             }
+            catch (SqlException ex)
+            {
+                Console.WriteLine($"Database error: {ex.Message}");
+                return "Database error occurred while retrieving order status.";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                return "Unexpected error occurred while retrieving order status.";
+            }
         }
+
         //
         public void AddInventory(Inventory inventory)
         {
@@ -184,9 +284,7 @@ namespace TechShopApp.dao
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error: {ex.Message}");
-                }
-            }
-        }
+                }}}
 
         public void UpdateInventory(Inventory inventory)
         {
@@ -205,9 +303,7 @@ namespace TechShopApp.dao
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error: {ex.Message}");
-                }
-            }
-        }
+                }}}
 
         public void RemoveInventory(int inventoryID)
         {
@@ -224,51 +320,16 @@ namespace TechShopApp.dao
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error: {ex.Message}");
-                }
-            }
-        }
-        //
-        //public List<SalesReport> GenerateSalesReport(DateTime startDate, DateTime endDate)
-        //{
-        //    List<SalesReport> reports = new List<SalesReport>();
-
-        //    using (SqlConnection connection = DatabaseConnector.OpenConnection())
-        //    {
-        //        try
-        //        {
-        //            string query = "SELECT ProductID, SUM(Quantity) AS TotalQuantity, SUM(TotalAmount) AS TotalSales FROM Orders WHERE OrderDate BETWEEN @StartDate AND @EndDate GROUP BY ProductID";
-        //            SqlCommand command = new SqlCommand(query, connection);
-        //            command.Parameters.AddWithValue("@StartDate", startDate);
-        //            command.Parameters.AddWithValue("@EndDate", endDate);
-
-        //            SqlDataReader reader = command.ExecuteReader();
-        //            while (reader.Read())
-        //            {
-        //                SalesReport report = new SalesReport
-        //                {
-        //                    ProductID = Convert.ToInt32(reader["ProductID"]),
-        //                    TotalQuantity = Convert.ToInt32(reader["TotalQuantity"]),
-        //                    TotalSales = Convert.ToDecimal(reader["TotalSales"])
-        //                };
-        //                reports.Add(report);
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine($"Error: {ex.Message}");
-        //        }
-        //    }
-
-        //    return reports;
-        //}
+                }}}
         public void UpdateCustomerAccount(Customer customer)
         {
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
             {
                 try
                 {
-                    string query = "UPDATE Customers SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Phone = @Phone, Address = @Address WHERE CustomerID = @CustomerID";
+                    string query = "UPDATE Customers SET Customer_FirstName = @FirstName, Customer_LastName = @LastName, Customer_Email = @Email, Customer_Phone = @Phone, Address = @Address WHERE Customer_id = @CustomerID";
                     SqlCommand command = new SqlCommand(query, connection);
+
                     command.Parameters.AddWithValue("@CustomerID", customer.CustomerID);
                     command.Parameters.AddWithValue("@FirstName", customer.FirstName);
                     command.Parameters.AddWithValue("@LastName", customer.LastName);
@@ -284,7 +345,6 @@ namespace TechShopApp.dao
                 }
             }
         }
-        //
         public void ProcessPayment(int orderID, decimal amount, string paymentMethod)
         {
             using (SqlConnection connection = DatabaseConnector.OpenConnection())
@@ -312,7 +372,6 @@ namespace TechShopApp.dao
                 }
             }
         }
-        //
         public List<Product> SearchProducts(string searchQuery)
         {
             List<Product> products = new List<Product>();
@@ -321,31 +380,39 @@ namespace TechShopApp.dao
             {
                 try
                 {
-                    string query = "SELECT ProductID, ProductName, Description, Price FROM Products WHERE ProductName LIKE @SearchQuery OR Description LIKE @SearchQuery";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@SearchQuery", "%" + searchQuery + "%");
+                    string query = @"
+                SELECT Product_id, Product_Name, Product_Description, Product_Price 
+                FROM Products 
+                WHERE Product_Name LIKE @SearchQuery OR Product_Description LIKE @SearchQuery";
 
-                    SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        int productID = Convert.ToInt32(reader["ProductID"]);
-                        string productName = reader["ProductName"].ToString();
-                        string description = reader["Description"].ToString();
-                        decimal price = Convert.ToDecimal(reader["Price"]);
+                        command.Parameters.AddWithValue("@SearchQuery", "%" + searchQuery + "%");
 
-                        Product product = new Product(productID, productName, description, price);
-                        products.Add(product);
-                    }
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                int productID = Convert.ToInt32(reader["Product_id"]);
+                                string productName = reader["Product_Name"].ToString();
+                                string description = reader["Product_Description"] != DBNull.Value
+                                    ? reader["Product_Description"].ToString()
+                                    : string.Empty;
+                                int price = Convert.ToInt32(reader["Product_Price"]);
+
+                                Product product = new Product(productID, productName, description, price);
+                                products.Add(product);
+                            }}}}
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine($"Unexpected Error: {ex.Message}");
                 }
-            }
-
-            return products;
+            }            return products;
         }
-
         public List<Product> GetRecommendedProducts(int customerID)
         {
             List<Product> recommendedProducts = new List<Product>();
@@ -354,33 +421,36 @@ namespace TechShopApp.dao
             {
                 try
                 {
-                    string query = "SELECT DISTINCT p.ProductID, p.ProductName, p.Description, p.Price FROM Products p INNER JOIN OrderDetails od ON p.ProductID = od.ProductID INNER JOIN Orders o ON o.OrderID = od.OrderID WHERE o.CustomerID = @CustomerID";
-                    SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue("@CustomerID", customerID);
-
-                    SqlDataReader reader = command.ExecuteReader();
-                    while (reader.Read())
+                    string query = @"
+                   SELECT DISTINCT p.Product_id, p.Product_Name, CAST(p.Product_Description AS
+                    NVARCHAR(MAX)) AS Product_Description, p.Product_Price FROM Products p
+                INNER JOIN OrderDetails od ON p.Product_id = od.Product_id
+                INNER JOIN Orders o ON o.Order_id = od.Order_id
+                WHERE o.Customer_id = @CustomerID";
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        // Using the parameterized constructor to create a Product object
-                        Product product = new Product(
-                            Convert.ToInt32(reader["ProductID"]),
-                            reader["ProductName"].ToString(),
-                            reader["Description"].ToString(),
-                            Convert.ToDecimal(reader["Price"])
-                        );
-                        recommendedProducts.Add(product);
-                    }
+                        command.Parameters.AddWithValue("@CustomerID", customerID);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                // Assuming you have a constructor like:
+                                // public Product(int productId, string name, string description, decimal price)
+                                Product product = new Product(
+                                    Convert.ToInt32(reader["Product_id"]),
+                                    reader["Product_Name"].ToString(),
+                                    reader["Product_Description"].ToString(),
+                                    Convert.ToInt32(reader["Product_Price"])
+                                );
+
+                                recommendedProducts.Add(product);
+                            }}}}
+                catch (SqlException sqlEx)
+                {Console.WriteLine("Database error: " + sqlEx.Message);
                 }
                 catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
+                {Console.WriteLine("Unexpected error: " + ex.Message);
                 }
-            }
-
-            return recommendedProducts;
-        }
-
-
-
-    }
+            }return recommendedProducts;
+        }    }
 }
